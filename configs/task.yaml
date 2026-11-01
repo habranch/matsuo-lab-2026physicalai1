@@ -1,0 +1,26 @@
+# Simulation, task and success criteria.
+control_hz: 20                # control updates per second
+traj_time_from_start: 0.1     # reference interpolation duration [s]
+joint_vel_limit: 2.0          # JOINT_VELOCITY_LIMIT in crane_plus.urdf.xacro [rad/s]
+gripper_fixed: 0.0            # gripper kept at a constant command, not part of state/action
+
+# geometry of the arm plane IK: tip pitch measured from +z (pi = pointing straight down)
+tip_pitch: 2.4435             # 140 deg
+
+ready_pose:                   # base start posture (joint1 = 0 deg); tip ~ (r=0.15, z=0.06)
+  tip_r: 0.15
+  tip_z: 0.060
+target:
+  yaw_deg: 110.0
+  r: 0.16
+  z: 0.050
+
+success:
+  radius: 0.02                # tip-target distance [m]
+  hold_time: 0.5              # continuous time inside radius [s, sim time]
+  time_limit: 25.0            # [s, sim time]; scripted demos take ~11-15 s
+
+# scripted operator: elbow-up posture used to pass over the wall (only joint2 / joint3 are changed)
+lift_pose:
+  joint2_deg: -20.0
+  joint3_deg: -60.0

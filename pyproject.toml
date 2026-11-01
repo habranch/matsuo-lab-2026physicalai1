@@ -1,0 +1,30 @@
+[project]
+name = "crane-reach"
+version = "0.1.0"
+description = "CRANE+ V2 obstacle-avoiding reach: ACT imitation learning, demo-diversity comparison (MuJoCo)"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "mujoco==3.3.0",
+    "numpy>=1.26,<2.3",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "torchcodec==0.2.1",
+    "lerobot",
+    "datasets>=3.2,<4",
+    "huggingface-hub>=0.27.1,<0.31",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "pyyaml>=6",
+    "draccus==0.10.0",
+]
+
+[tool.uv.sources]
+# ACT implementation used by this experiment.
+lerobot = { git = "https://github.com/huggingface/lerobot.git", rev = "768e36660d1408c71118a2760f831c037fbfa17d" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/crane_reach"]

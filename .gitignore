@@ -1,0 +1,12 @@
+.venv/
+artifacts/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+exp/**/results/
+exp/003_demo_diversity/data_manifest.csv
+exp/003_demo_diversity/dataset_summary.csv
+exp/003_demo_diversity/runs.csv
+exp/004_wide_range/candidate_states.csv

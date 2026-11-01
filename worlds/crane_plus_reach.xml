@@ -1,0 +1,122 @@
+<!--
+  CRANE+ V2 MuJoCo model based on the official URDF/xacro and meshes of rt-net/crane_plus
+  (humble, 87486bb; Apache-2.0). Original meshes and reference URDF files are in assets/.
+
+  Link offsets, joint axes and limits, velocity and effort limits, masses, centers of mass,
+  and visual/collision meshes follow the URDF. Inertia uses diagonal terms without the
+  URDF inertia-frame rotations. Joint damping, friction, armature and position gains
+  are specified for this MuJoCo model; dynamic equivalence with other simulators is unverified.
+
+  Robot self-collision forces are disabled. Distances between non-adjacent links are
+  monitored by crane_reach.sim.SELF_PAIRS. Model validation is in exp/000_smoke/.
+  The scene has a fixed target marker and one fixed box obstacle. Robot collision geoms
+  (contype=1, conaffinity=2) interact with the table and obstacle (contype=2, conaffinity=1).
+-->
+<mujoco model="crane_plus_reach">
+  <compiler angle="radian" meshdir="assets" autolimits="true"/>
+  <option timestep="0.002" integrator="implicitfast"/>
+
+  <visual>
+    <global offwidth="1280" offheight="720"/>
+    <quality shadowsize="4096"/>
+    <headlight ambient="0.35 0.35 0.35" diffuse="0.6 0.6 0.6"/>
+  </visual>
+
+  <default>
+    <joint damping="0.05" armature="0.002" frictionloss="0.01"/>
+    <default class="visual">
+      <geom contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="collision">
+      <geom contype="1" conaffinity="2" group="3" rgba="0.5 0.5 0.5 0.3"/>
+    </default>
+    <position kp="12" dampratio="1.0" forcerange="-1.5 1.5"/>
+  </default>
+
+  <asset>
+    <mesh name="base_v" file="body_20201013.stl"/>
+    <mesh name="link1_v" file="Link1_20201013.stl"/>
+    <mesh name="link2_v" file="Link2_20201013.stl"/>
+    <mesh name="link3_v" file="Link3_20201013.stl"/>
+    <mesh name="link4_v" file="Link4_20201013.stl"/>
+    <mesh name="hand_v" file="Hand_20201013.stl"/>
+    <mesh name="base_c" file="body_collision_20201013.stl"/>
+    <mesh name="link1_c" file="Link1_collision_20201013.stl"/>
+    <mesh name="link2_c" file="Link2_collision_20201013.stl"/>
+    <mesh name="link3_c" file="Link3_collision_20201013.stl"/>
+    <mesh name="link4_c" file="Link4_collision_20201013.stl"/>
+    <mesh name="hand_c" file="Hand_collision_20201013.stl"/>
+    <material name="black" rgba="0.2 0.2 0.2 1"/>
+    <material name="white" rgba="0.95 0.95 0.95 1"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.82 0.78 0.70" rgb2="0.76 0.72 0.64" width="512" height="512"/>
+    <material name="table" texture="grid" texrepeat="8 8"/>
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.92 0.94 0.97" rgb2="0.7 0.75 0.82" width="256" height="256"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.3 -0.3 1.0" dir="-0.3 0.3 -1" diffuse="0.7 0.7 0.7" castshadow="true"/>
+    <!-- table top surface at z = 0 -->
+    <geom name="table" type="box" size="0.4 0.4 0.01" pos="0.1 0 -0.01" material="table" contype="2" conaffinity="1"/>
+
+    <!-- fixed obstacle (yaw 52 deg, r 0.08-0.22 m, height 0.08 m): a wall that blocks the low, direct path between the start pose and the target -->
+    <body name="obstacle" pos="0.0923 0.1182 0.04">
+      <geom name="obstacle" type="box" size="0.07 0.01 0.04" euler="0 0 0.9076" rgba="0.85 0.25 0.2 1"
+            contype="2" conaffinity="1"/>
+    </body>
+
+    <!-- target marker (yaw 110 deg, r 0.16 m, z 0.050 m; visual only, no contact) -->
+    <body name="target" pos="-0.0547 0.1504 0.050">
+      <site name="target" type="sphere" size="0.02" rgba="0.1 0.7 0.2 0.25"/>
+      <geom type="sphere" size="0.004" rgba="0.1 0.6 0.2 1" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="crane_plus_base" pos="0 0 0">
+      <inertial pos="-0.0131 0 0.0212" mass="0.06645" diaginertia="1.66e-5 2.36e-5 1.77e-5"/>
+      <geom class="visual" type="mesh" mesh="base_v" material="black"/>
+      <!-- base collision mesh: fixed to the table, used only for the self-distance monitor -->
+      <geom name="base_c" type="mesh" mesh="base_c" contype="0" conaffinity="0" group="3" rgba="0.5 0.5 0.5 0.3"/>
+      <body name="crane_plus_link1" pos="0 0 0.0454">
+        <inertial pos="0 0 0.0109" mass="0.007729" diaginertia="3.43e-6 1.30e-6 3.05e-6"/>
+        <joint name="crane_plus_joint1" axis="0 0 1" range="-2.618 2.618"/>
+        <geom class="visual" type="mesh" mesh="link1_v" euler="0 0 3.14159265" material="white"/>
+        <geom class="collision" name="link1_c" type="mesh" mesh="link1_c" euler="0 0 3.14159265"/>
+        <body name="crane_plus_link2" pos="0 0 0.026">
+          <inertial pos="0.0008 0 0.0415" mass="0.116745" diaginertia="1.25e-4 1.92e-5 1.19e-4"/>
+          <joint name="crane_plus_joint2" axis="0 1 0" range="-1.8247 1.7837"/>
+          <geom class="visual" type="mesh" mesh="link2_v" euler="1.5707963 0 0" material="black"/>
+          <geom class="collision" name="link2_c" type="mesh" mesh="link2_c" euler="1.5707963 0 0"/>
+          <body name="crane_plus_link3" pos="0 0 0.083">
+            <inertial pos="0.0006 -0.0001 0.0701" mass="0.072317" diaginertia="5.41e-5 1.60e-5 4.69e-5"/>
+            <joint name="crane_plus_joint3" axis="0 -1 0" range="-2.5566 2.4543"/>
+            <geom class="visual" type="mesh" mesh="link3_v" euler="1.5707963 0 0" material="white"/>
+            <geom class="collision" name="link3_c" type="mesh" mesh="link3_c" euler="1.5707963 0 0"/>
+            <body name="crane_plus_link4" pos="0 0 0.0935">
+              <inertial pos="0.0006 -0.0006 0.0462" mass="0.08185" diaginertia="5.91e-5 3.62e-5 3.98e-5"/>
+              <joint name="crane_plus_joint4" axis="0 -1 0" range="-1.8401 1.7684"/>
+              <geom class="visual" type="mesh" mesh="link4_v" euler="1.5707963 0 0" material="black"/>
+              <geom class="collision" name="link4_c" type="mesh" mesh="link4_c" euler="1.5707963 0 0"/>
+              <site name="tip" pos="0 0 0.115" size="0.004" rgba="0.1 0.3 1 1"/>
+              <body name="crane_plus_link_hand" pos="0 -0.0145 0.045">
+                <inertial pos="0 -0.0204 0.0277" mass="0.022901" diaginertia="5.76e-6 2.76e-5 2.52e-5"/>
+                <joint name="crane_plus_joint_hand" axis="-1 0 0" range="-0.7090 0.6679"/>
+                <geom class="visual" type="mesh" mesh="hand_v" euler="0 -1.5707963 0" material="white"/>
+                <geom class="collision" name="hand_c" type="mesh" mesh="hand_c" euler="0 -1.5707963 0"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <camera name="front" pos="0.55 -0.30 0.38" xyaxes="0.48 0.88 0 -0.42 0.23 0.88"/>
+    <camera name="top" pos="0.08 0.05 0.75" xyaxes="1 0 0 0 1 0"/>
+  </worldbody>
+
+  <actuator>
+    <position name="a_joint1" joint="crane_plus_joint1" ctrlrange="-2.618 2.618"/>
+    <position name="a_joint2" joint="crane_plus_joint2" ctrlrange="-1.8247 1.7837"/>
+    <position name="a_joint3" joint="crane_plus_joint3" ctrlrange="-2.5566 2.4543"/>
+    <position name="a_joint4" joint="crane_plus_joint4" ctrlrange="-1.8401 1.7684"/>
+    <position name="a_hand" joint="crane_plus_joint_hand" ctrlrange="-0.7090 0.6679"/>
+  </actuator>
+</mujoco>
